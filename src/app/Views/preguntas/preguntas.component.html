@@ -1,0 +1,102 @@
+<div class="no-print container mx-auto px-4 py-6" style="margin-bottom: 200px;">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Sección izquierda: Lista de preguntas y respuestas -->
+        <div class="bg-white p-6 rounded-lg shadow-lg max-h-[400px] overflow-y-auto">
+            <h2 class="text-2xl font-semibold mb-4">Listado de Preguntas</h2>
+            <div id="listadoPreguntas" class="space-y-4">
+                <!-- Itera sobre las preguntas y muestra cada una en un panel -->
+                <div *ngFor="let pregunta of preguntasList; let i = index" class="border rounded-lg p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <!-- Muestra la pregunta con su índice -->
+                        <div class="font-semibold text-lg">{{ i + 1 }}. {{ pregunta.pregunta }}</div>
+                        <!-- Muestra el puntaje y la dificultad -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600">({{ pregunta.puntaje }} pts)</span>
+                            <span
+                                [ngClass]="{'bg-green-100 text-green-700': pregunta.dificultad === 'facil', 'bg-yellow-100 text-yellow-700': pregunta.dificultad === 'media', 'bg-red-100 text-red-700': pregunta.dificultad === 'dificil'}"
+                                class="text-xs font-semibold px-2 py-1 rounded">
+                                {{ pregunta.dificultad | titlecase }}
+                            </span>
+                        </div>
+                    </div>
+                    <ul class="list-[lower-alpha] pl-6">
+                        <!-- Itera sobre las respuestas y las muestra en una lista -->
+                        <li *ngFor="let respuesta of pregunta.respuesta; let j = index" class="mb-2">
+                            <!-- Muestra cada respuesta con una letra como marcador -->
+                            {{ respuesta }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección derecha: Formulario para agregar preguntas y respuestas -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">Agregar Pregunta</h2>
+            <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Textarea para ingresar preguntas -->
+        <div>
+            <label for="preguntasTextarea" class="block font-semibold mb-2">Preguntas:</label>
+            <textarea id="preguntasTextarea" formControlName="preguntasTextarea" rows="10" required
+                class="w-full border rounded p-2 focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+                <!-- Botón para enviar el formulario -->
+                <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">
+                    Guardar Pregunta
+                </button>
+            </form>
+
+            <!-- Campo para la dificultad -->
+            <div>
+                <label for="dificultad" class="block font-semibold mb-2 mt-4">Dificultad (0 a 1):</label>
+                <div class="flex flex-row">
+                    <input type="range" id="dificultad" (input)="updateDificultad($event)" min="0" max="1" step="0.01"
+                    class="w-full">
+                    <p class="text-sm text-gray-500 ml-2">{{ dificultad }}</p>
+                </div>
+            </div>
+
+            <!-- Campo para la cantidad de exámenes -->
+            <div>
+                <label for="cantidadExamenes" class="block font-semibold mb-2">Cantidad de exámenes a crear:</label>
+                <input type="number" [(ngModel)]="cantidadExamenes" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <!-- Campo para la cantidad de preguntas por examen -->
+            <div>
+                <label for="preguntasPorExamen" class="block font-semibold mb-2">Cantidad de preguntas por
+                    examen:</label>
+                <input type="number" [(ngModel)]="preguntasPorExamen" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <!-- Botones para descargar Excel y PDF -->
+            <div class="flex flex-row  mt-6">
+                <!-- Botón para descargar Excel -->
+                <button (click)="downloadExcel()"
+                    class="w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+
+                <!-- Botón para importar Excel -->
+                <button
+                    class="w-full bg-yellow-500 hover:bg-yellow-600 border p-2 rounded text-white font-bold text-center"
+                    onclick="document.getElementById('importExcelInput').click()">
+                    <i class="fas fa-upload"></i>
+                </button>
+                <input
+                id="importExcelInput"
+                type="file"
+                accept=".xls, .xlsx"
+                style="display: none;"
+                (change)="onFileChange($event)"
+            >
+            
+                <!-- Botón para descargar PDF -->
+                <button class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600"
+                    (click)="generarPDF()">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
