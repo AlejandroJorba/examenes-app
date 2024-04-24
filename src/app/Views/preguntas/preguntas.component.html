@@ -11,9 +11,9 @@
                         <div class="font-semibold text-lg">{{ i + 1 }}. {{ pregunta.pregunta }}</div>
                         <!-- Muestra el puntaje y la dificultad -->
                         <div class="flex items-center space-x-2">
-                            <span class="text-sm text-gray-600">({{ pregunta.puntaje }} pts)</span>
+                            <span *ngIf="pregunta.puntaje != undefined" class="text-sm text-gray-600">({{ pregunta.puntaje }} pts)</span>
                             <span
-                                [ngClass]="{'bg-green-100 text-green-700': pregunta.dificultad === 'facil', 'bg-yellow-100 text-yellow-700': pregunta.dificultad === 'media', 'bg-red-100 text-red-700': pregunta.dificultad === 'dificil'}"
+                                [ngClass]="{'bg-green-100 text-green-700': pregunta.dificultad === 'Facil', 'bg-yellow-100 text-yellow-700': pregunta.dificultad === 'Media', 'bg-red-100 text-red-700': pregunta.dificultad === 'Dificil'}"
                                 class="text-xs font-semibold px-2 py-1 rounded">
                                 {{ pregunta.dificultad | titlecase }}
                             </span>
@@ -32,41 +32,73 @@
 
         <!-- Sección derecha: Formulario para agregar preguntas y respuestas -->
         <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold mb-4">Agregar Pregunta</h2>
-            <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Textarea para ingresar preguntas -->
-        <div>
-            <label for="preguntasTextarea" class="block font-semibold mb-2">Preguntas:</label>
-            <textarea id="preguntasTextarea" formControlName="preguntasTextarea" rows="10" required
-                class="w-full border rounded p-2 focus:outline-none focus:border-blue-500"></textarea>
-        </div>
+            <div class="flex flex-row justify-between mb-4">
+                <h2 class="text-2xl font-semibold">Agregar Configuración</h2>
+                <!-- Botón para abrir el modal -->
+                <button (click)="mostrarModal = true"
+                    class="w-20 bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-file-alt"></i>
+                </button>
+            </div>
+            <!-- Modal para ingresar los datos del header -->
+            <app-header *ngIf="mostrarModal" (guardarHeader)="actualizarHeader($event)"
+                (cerrarModal)="mostrarModal = false">
+            </app-header>
+
+            <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="space-y-6 mb-4">
+                <!-- Textarea para ingresar preguntas -->
+                <div>
+                    <label for="preguntasTextarea" class="block font-semibold mb-2">Preguntas:</label>
+                    <textarea id="preguntasTextarea" formControlName="preguntasTextarea" rows="10" required
+                        class="w-full border rounded p-2 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
                 <!-- Botón para enviar el formulario -->
                 <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600">
-                    Guardar Pregunta
+                    Guardar Preguntas
                 </button>
             </form>
 
+
+
             <!-- Campo para la dificultad -->
+            <!--
             <div>
                 <label for="dificultad" class="block font-semibold mb-2 mt-4">Dificultad (0 a 1):</label>
                 <div class="flex flex-row">
                     <input type="range" id="dificultad" (input)="updateDificultad($event)" min="0" max="1" step="0.01"
-                    class="w-full">
+                        class="w-full">
                     <p class="text-sm text-gray-500 ml-2">{{ dificultad }}</p>
                 </div>
             </div>
-
+-->
             <!-- Campo para la cantidad de exámenes -->
             <div>
                 <label for="cantidadExamenes" class="block font-semibold mb-2">Cantidad de exámenes a crear:</label>
-                <input type="number" [(ngModel)]="cantidadExamenes" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                <input type="number" [(ngModel)]="cantidadExamenes"
+                    class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            </div>
+            <!--
+            <div class="mb-4">
+                <label for="criterio" class="block text-gray-700 font-semibold mb-2">
+                    Selecciona el criterio para generar los exámenes:
+                </label>
+                <select id="criterio" [(ngModel)]="criterioSeleccionado"
+                    class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="questionsPerExam">Número de preguntas por examen</option>
+                    <option value="puntajeTotal">Puntaje total por examen</option>
+                </select>
+            </div>
+-->
+            <div class="mt-2" *ngIf="criterioSeleccionado === 'questionsPerExam'">
+                <label for="preguntasPorExamen" class="block font-semibold mb-2">Número de preguntas por examen:</label>
+                <input type="number" [(ngModel)]="preguntasPorExamen"
+                    class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
             </div>
 
-            <!-- Campo para la cantidad de preguntas por examen -->
-            <div>
-                <label for="preguntasPorExamen" class="block font-semibold mb-2">Cantidad de preguntas por
-                    examen:</label>
-                <input type="number" [(ngModel)]="preguntasPorExamen" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            <div *ngIf="criterioSeleccionado === 'puntajeTotal'">
+                <label for="puntajeTotal">Puntaje total por examen:</label>
+                <input type="puntajeTotal" [(ngModel)]="puntajeTotal"
+                    class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
             </div>
 
             <!-- Botones para descargar Excel y PDF -->
@@ -83,19 +115,17 @@
                     onclick="document.getElementById('importExcelInput').click()">
                     <i class="fas fa-upload"></i>
                 </button>
-                <input
-                id="importExcelInput"
-                type="file"
-                accept=".xls, .xlsx"
-                style="display: none;"
-                (change)="onFileChange($event)"
-            >
-            
+                <input id="importExcelInput" type="file" accept=".xls, .xlsx" style="display: none;"
+                    (change)="onFileChange($event)">
+
                 <!-- Botón para descargar PDF -->
                 <button class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600"
                     (click)="generarPDF()">
-                    <i class="fas fa-file-pdf"></i>
+                    <i *ngIf="!cargandoPDF" class="fas fa-file-pdf"></i>
+                    <div *ngIf="cargandoPDF" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white">
+                    </div>
                 </button>
+
             </div>
         </div>
     </div>

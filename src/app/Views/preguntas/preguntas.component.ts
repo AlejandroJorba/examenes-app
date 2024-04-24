@@ -1,29 +1,44 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Pregunta } from '../../Interfaces/Pregunta';
 import * as XLSX from 'xlsx';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
 import { ExamService } from '../../Services/ExamenService';
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { HeaderComponent } from '../header/header.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-preguntas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent],
   templateUrl: './preguntas.component.html'
 })
 export class PreguntasComponent implements OnInit {
+
   // Define el formulario para agregar preguntas
   questionForm: FormGroup;
   // Lista de preguntas agregadas
   preguntasList: Pregunta[] = [];
   dificultad: number = 1;
-  preguntasPorExamen: number = 0;
-  cantidadExamenes: number = 0;
+  preguntasPorExamen: number = 1;
+  cantidadExamenes: number = 1;
+  puntajeTotal: number = 0;
+  criterioSeleccionado: string = 'questionsPerExam';
+  cargandoPDF: boolean = false;
+  // Estado para controlar la visibilidad del modal
+  mostrarModal: boolean = false;
+
+  // Variables para almacenar los datos del header
+  institucion: string = '';
+  examen: string = '';
+  fecha: string = '';
+  duracion: string = '';
+  profesor: string = '';
+  catedra: string = '';
+  logoFiles: File[] = [];
+
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService) {
     const valorInicialPreguntas = `
     Pregunta 1 - 10 - fácil
@@ -45,10 +60,37 @@ export class PreguntasComponent implements OnInit {
   ngOnInit() {
   }
 
+  actualizarHeader(datos: any): void {
+    // Actualizar las variables del componente con los datos recibidos del modal
+    this.institucion = datos.institucion;
+    this.examen = datos.examen;
+    this.fecha = datos.fecha;
+    this.duracion = datos.duracion;
+    this.profesor = datos.profesor;
+    this.catedra = datos.catedra;
+    this.logoFiles = datos.logoFile;
+    // Cerrar el modal después de actualizar los datos
+    this.mostrarModal = false;
+  }
+
+  formatDate(date: Date): string {
+    // Crea un objeto de tipo Intl.DateTimeFormat para formatear la fecha en español
+    const formatter = new Intl.DateTimeFormat('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    // Devuelve la fecha formateada en el formato deseado
+    return formatter.format(date);
+  }
+
+
   updateDificultad($event: any): string {
     this.dificultad = $event.target.value;
     return this.dificultad.toString();
   }
+
   // Crea un nuevo FormGroup para una respuesta
   createRespuesta(): FormGroup {
     return this.fb.group({
@@ -141,97 +183,187 @@ export class PreguntasComponent implements OnInit {
   }
 
 
-public async generarPDF(): Promise<void> {
-    try {
-        // Obtener los parámetros del examen
-        const cantExamenes = this.cantidadExamenes;
-        const cantPreguntas = this.preguntasPorExamen;
-        const preguntas: Pregunta[] = this.preguntasList;
-        const body = document.body.innerHTML;
-        // Generar exámenes utilizando el servicio
-        const examenes = this.examService.generateExams(cantExamenes, cantPreguntas, preguntas);
+  public async generarPDF(): Promise<void> {
+    this.cargandoPDF = true;
+    // Obtener los parámetros del examen
+    const cantExamenes = this.cantidadExamenes;
+    const cantPreguntas = this.preguntasPorExamen;
+    const puntaje = this.puntajeTotal;
+    const preguntas: Pregunta[] = this.preguntasList;
+    // Generar exámenes utilizando el servicio
+    const examenes = this.examService.generateExams(cantExamenes, cantPreguntas, puntaje, preguntas);
+    const htmlDiv = document.createElement('div');
 
-        // Iterar sobre cada examen
-        for (let i = 0; i < examenes.length; i++) {
-            const examen = examenes[i];
+    // Iterar sobre cada examen
+    for (let i = 0; i < examenes.length; i++) {
+      const examen = examenes[i];
+      const examenDiv = document.createElement('div');
 
-            // Cargar el archivo HTML como plantilla
-            const response = await this.http.get('assets/reporteExamen.html', { responseType: 'text' }).toPromise();
-            const htmlContent = response as string;
+      // Cargar el archivo HTML como plantilla
+      const response = await this.http.get('assets/reporteExamen.html', { responseType: 'text' }).toPromise();
+      examenDiv.innerHTML = response as string;
 
-            // Crear un elemento div para cargar el HTML
-            const htmlDiv = document.createElement('div');
-            htmlDiv.innerHTML = htmlContent;
 
-            // Obtener el contenedor de preguntas desde el HTML cargado
-            const preguntasContainer = htmlDiv.querySelector<HTMLElement>('#preguntasContainer');
+      const headerDiv = document.createElement('div');
 
-            if (!preguntasContainer) {
-                console.error('No se encontró el contenedor de preguntas en el HTML cargado.');
-                continue;
-            }
+      // Sección de información esencial
+      const infoDiv = document.createElement('div');
+      infoDiv.classList.add('header-info', 'text-right');
 
-            // Limpia el contenedor de preguntas antes de llenarlo
-            preguntasContainer.innerHTML = '';
-            // Añadir la clase CSS para el salto de página antes de cada examen
-            if (i > 0) {
-              htmlDiv.style.pageBreakBefore = 'always';
-          }
+      // Sección de logo
+      if (this.logoFiles?.length > 0) {
 
-            // Iterar sobre cada pregunta en el examen y añadirla al contenedor
-            examen.forEach((pregunta: Pregunta, index: number) => {
-                // Crea un div para la pregunta
-                const preguntaDiv = document.createElement('div');
-                preguntaDiv.classList.add('mb-6');
+        infoDiv.style.borderTop = '2px solid #ccc'; // Estilo de borde inferior
+        infoDiv.style.marginTop = '20px'; // Margen inferior
 
-                // Añadir el título de la pregunta
-                const preguntaTitulo = document.createElement('div');
-                preguntaTitulo.classList.add('text-lg', 'font-semibold', 'mb-2');
-                preguntaTitulo.textContent = `${pregunta.pregunta}`;
-                preguntaDiv.appendChild(preguntaTitulo);
+        // Crear el header con los logos
+        headerDiv.classList.add('header-img');
+        // Convertir cada archivo a base64
+        Array.from(this.logoFiles).forEach(file => {
+          this.convertFileToBase64(file).subscribe(base64String => {
+            // Aquí puedes hacer lo que quieras con cada base64String
+            // Por ejemplo, mostrar el logo en el documento
+            const logoImg = document.createElement('img');
+            logoImg.src = base64String;
+            logoImg.width = 100;
+            logoImg.height = 100;
+            headerDiv.appendChild(logoImg); // Añadir al documento
+          });
+        });
+      }
 
-                // Crear lista de respuestas y añadirlas al div
-                const respuestasList = document.createElement('ul');
-                respuestasList.classList.add('space-y-2');
-                pregunta.respuesta.forEach((respuesta, i) => {
-                    const respuestaItem = document.createElement('li');
-                    respuestaItem.classList.add('flex', 'items-center');
+      // Nombre de la institución
+      const universidadH1 = document.createElement('h1');
+      universidadH1.textContent = `${this.institucion}`;
+      universidadH1.classList.add('text-xl', 'font-bold');
+      infoDiv.appendChild(universidadH1);
 
-                    // Crear checkbox para la respuesta
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `q${index + 1}a${i + 1}`;
-                    checkbox.name = `q${index + 1}`;
-                    checkbox.value = respuesta;
-                    checkbox.classList.add('mr-2');
+      // Información del examen
+      const examenH2 = document.createElement('h2');
+      examenH2.textContent = `${this.examen}`;
+      infoDiv.appendChild(examenH2);
 
-                    // Crear etiqueta para la respuesta
-                    const respuestaLabel = document.createElement('label');
-                    respuestaLabel.htmlFor = checkbox.id;
-                    respuestaLabel.textContent = respuesta;
+      // Fecha, duración y puntaje
+      const fechaP = document.createElement('p');
+      fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Duración:</strong> ${this.duracion} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
+      infoDiv.appendChild(fechaP);
 
-                    // Añadir checkbox y etiqueta al elemento de lista
-                    respuestaItem.appendChild(checkbox);
-                    respuestaItem.appendChild(respuestaLabel);
-                    respuestasList.appendChild(respuestaItem);
-                });
+      // Instructor y código del curso
+      const instructorP = document.createElement('p');
+      instructorP.innerHTML = `<strong>Profesor:</strong> ${this.profesor} | <strong>Cátedra:</strong> ${this.catedra}`;
+      infoDiv.appendChild(instructorP);
 
-                // Añadir lista de respuestas al div de la pregunta
-                preguntaDiv.appendChild(respuestasList);
-                preguntasContainer.appendChild(preguntaDiv);
-            });
+      // Instructor y código del curso
+      const alumnoP = document.createElement('p');
+      alumnoP.innerHTML = `<strong>Nombre:</strong> <span style="margin-left: 240px;"></span>| <strong>DNI:</strong>`;
+      infoDiv.appendChild(alumnoP);
 
-            // Añadir el div HTML al documento para imprimirlo
-            document.body.appendChild(htmlDiv);
-            
-          }
-          // Imprimir el examen (solo el contenido actual)
-          window.print();
-          document.body.innerHTML = body;
-    } catch (error) {
-        console.error('Error al generar el PDF:', error);
+
+      // Añadir el headerDiv al htmlDiv
+      examenDiv.insertBefore(infoDiv, examenDiv.firstChild);
+      // Añadir el headerDiv al htmlDiv
+      examenDiv.insertBefore(headerDiv, examenDiv.firstChild);
+
+      // Obtener el contenedor de preguntas desde el HTML cargado
+      const preguntasContainer = examenDiv.querySelector<HTMLElement>('#preguntasContainer');
+
+      if (!preguntasContainer) {
+        console.error('No se encontró el contenedor de preguntas en el HTML cargado.');
+        continue;
+      }
+
+      // Limpia el contenedor de preguntas antes de llenarlo
+      preguntasContainer.innerHTML = '';
+      // Añadir la clase CSS para el salto de página antes de cada examen
+      if (i > 0) {
+        examenDiv.style.pageBreakBefore = 'always';
+      }
+
+      // Iterar sobre cada pregunta en el examen y añadirla al contenedor
+      examen.forEach((pregunta: Pregunta, index: number) => {
+        // Crea un div para la pregunta
+        const preguntaDiv = document.createElement('div');
+        preguntaDiv.classList.add('mb-6');
+
+        // Añadir el título de la pregunta
+        const preguntaTitulo = document.createElement('div');
+        preguntaTitulo.classList.add('text-lg', 'font-semibold', 'mb-2');
+        preguntaTitulo.textContent = `${index + 1}. ${pregunta.pregunta}`;
+
+        // Crear un span para el puntaje de la pregunta
+        const puntajeSpan = document.createElement('span');
+        puntajeSpan.classList.add('text-sm', 'font-bold', 'text-gray-600', 'ml-2'); // Personaliza las clases según tus preferencias
+
+        // Asigna el texto que contiene el puntaje de la pregunta
+        puntajeSpan.textContent = ` (${pregunta.puntaje} pts)`;
+
+        // Añadir el span con el puntaje al div del título de la pregunta
+        preguntaTitulo.appendChild(puntajeSpan);
+
+        preguntaDiv.appendChild(preguntaTitulo);
+
+        // Crear lista de respuestas y añadirlas al div
+        const respuestasList = document.createElement('ul');
+        respuestasList.classList.add('space-y-2');
+        pregunta.respuesta.forEach((respuesta, i) => {
+          const respuestaItem = document.createElement('li');
+          respuestaItem.classList.add('flex', 'items-center');
+
+          // Crear checkbox para la respuesta
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = respuesta;
+          checkbox.classList.add('mr-2');
+
+          // Crear etiqueta para la respuesta
+          const respuestaLabel = document.createElement('label');
+          respuestaLabel.htmlFor = checkbox.id;
+          respuestaLabel.textContent = respuesta;
+
+          // Añadir checkbox y etiqueta al elemento de lista
+          respuestaItem.appendChild(checkbox);
+          respuestaItem.appendChild(respuestaLabel);
+          respuestasList.appendChild(respuestaItem);
+        });
+
+        // Añadir lista de respuestas al div de la pregunta
+        preguntaDiv.appendChild(respuestasList);
+        preguntasContainer.appendChild(preguntaDiv);
+      });
+
+      // Añadir el div HTML al documento para imprimirlo
+      htmlDiv.appendChild(examenDiv);
     }
-}
+
+    document.body.appendChild(htmlDiv);
+
+    this.cargandoPDF = false;
+    // Imprimir el examen (solo el contenido actual)
+    await new Promise(r => setTimeout(r, 1000));
+    window.print();
+    htmlDiv.remove()
+  }
+
+  convertFileToBase64(file: File): Observable<string> {
+    return new Observable(observer => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        // Cuando la conversión a base64 se completa, resuelve la promesa con el resultado
+        const base64String = reader.result as string;
+        observer.next(base64String);
+        observer.complete();
+      };
+
+      reader.onerror = (e) => {
+        // Si ocurre un error durante la lectura del archivo, rechaza la promesa
+        observer.error(e);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
 
   onSubmit() {
     const formData = this.questionForm.value;
@@ -254,18 +386,16 @@ public async generarPDF(): Promise<void> {
       // Crear un objeto Pregunta
       const nuevaPregunta: Pregunta = {
         pregunta: pregunta.trim(),
-        puntaje: puntaje.trim(),
-        dificultad: dificultad.trim(),
+        puntaje: puntaje?.trim(),
+        dificultad: dificultad?.trim(),
         respuesta: respuestas.map(respuesta => respuesta.trim()).filter(respuesta => respuesta !== ''),
       };
 
       // Agregar la pregunta a la lista
       this.preguntasList.push(nuevaPregunta);
     });
-    
+
     this.questionForm.reset();
-    console.log('Preguntas procesadas:', preguntasList);
-    // Puedes proceder a hacer algo con la lista de preguntas aquí
   }
 
 }
