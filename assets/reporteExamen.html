@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Examen de Universidad</title>
     <style>
         /* Estilo para el fondo del cuerpo */
@@ -58,15 +59,69 @@
         .mr-2 {
             margin-right: 0.5rem;
         }
-        
-    </style>
-</head>
 
+/* Estilos para el membrete del examen */
+.exam-header {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.header-img{
+    display: flex;
+    justify-content: space-around;
+}
+
+/* Estilo para la información esencial */
+.header-info {
+    text-align: start;
+    padding: 20px;
+    border-bottom: 2px solid #ccc;  
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+}
+
+/* Estilo para los títulos y textos */
+.header-info h1, .header-info h2 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.header-info h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.header-info h2 {
+    font-size: 18px;
+    color: #555;
+    margin-top: 10px;
+}
+
+.header-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #777;
+}
+
+/* Estilo adicional para la sección de información */
+.header-info p strong {
+    color: #333;
+}
+
+</style>
+
+</head>
 <body>
     <div class="container">
-        <h2>Examen de Universidad</h2>
-        <div id="preguntasContainer"></div>
+    
+    <!-- Contenedor de preguntas -->
+    <div id="preguntasContainer"></div>
     </div>
 </body>
-
 </html>
+
+<head>
+</head>
+
