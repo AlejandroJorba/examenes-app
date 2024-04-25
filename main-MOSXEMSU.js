@@ -156,6 +156,8 @@ import{$ as ot,$a as $o,A as mh,Aa as Lt,B as Pl,Ba as Wo,C as $n,Ca as or,D as 
         - Si no se colocan respuestas se colocar\xE1 la pregunta sola
         <br>
         - Cuando se ingrese una pregunta debe hacerse enter para ingresar la siguiente
+        <br>
+        - Debe separarse entre guiones (-) la pregunta con sus dem\xE1s valores, ejemplo: Es hoy mi\xE9rcoles? - 10 - F\xE1cil
         `,attachTo:{element:"#preguntasTextarea",on:"right"},modalOverlayOpeningPadding:10,floatingUIOptions:{middleware:[Yr({mainAxis:30,crossAxis:40})]},buttons:[{text:"Anterior",action:()=>(this.mostrarModal=!0,setTimeout(()=>{this.shepherdService.back()},1))},{text:"Siguiente",action(){return this.next()}}]},{text:"Cuando tengas ingresadas las preguntas clickea en este bot\xF3n para guardarlas",attachTo:{element:"#guardarPreguntas",on:"right"},modalOverlayOpeningPadding:10,floatingUIOptions:{middleware:[Yr({mainAxis:30,crossAxis:40})]},buttons:[{text:"Anterior",action(){return this.back()}},{text:"Siguiente",action(){return this.next()}}]},{text:`
         Ac\xE1 van las cantidades que desees, si no se ingresan valores no se puede generar el PDF
         <br>
