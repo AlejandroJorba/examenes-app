@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Pregunta } from '../../Interfaces/Pregunta';
@@ -8,6 +8,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ExamService } from '../../Services/ExamenService';
 import { HeaderComponent } from '../header/header.component';
 import { Observable } from 'rxjs';
+import { ShepherdService } from 'angular-shepherd';
+import { offset } from '@floating-ui/dom';
 
 @Component({
   selector: 'app-preguntas',
@@ -15,8 +17,9 @@ import { Observable } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent],
   templateUrl: './preguntas.component.html'
 })
-export class PreguntasComponent implements OnInit {
+export class PreguntasComponent implements AfterViewInit {
 
+  tutorialSeen = localStorage.getItem('tutorialSeen');
   // Define el formulario para agregar preguntas
   questionForm: FormGroup;
   // Lista de preguntas agregadas
@@ -40,7 +43,7 @@ export class PreguntasComponent implements OnInit {
   dniChecked: boolean = true;
   logoFiles: File[] = [];
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
     Pregunta 1 - 10 - fácil
     Respuesta 1.1
@@ -56,6 +59,286 @@ export class PreguntasComponent implements OnInit {
     this.questionForm = this.fb.group({
       preguntasTextarea: [valorInicialPreguntas, [Validators.required]], // `textarea` para preguntas
     });
+  }
+  ngAfterViewInit(): void {
+
+    this.shepherdService.defaultStepOptions = {
+      cancelIcon: {
+        enabled: true
+      },
+      scrollTo: { behavior: 'smooth', block: 'center' },
+      when: {
+        show: function () {
+          // Aquí `this` se refiere al paso (`Step`) en cuestión
+          // Obtenemos el índice del paso actual
+          const idStep = this.id;
+
+          // Si no es el primer paso, ejecuta el código
+          if (idStep != "firstStep") {
+            const footer = this.getElement()?.querySelector('.shepherd-footer');
+
+            // Elimina todas las clases relacionadas
+            footer?.classList.remove('single-button', 'multiple-buttons');
+            footer?.classList.add('multiple-buttons');
+          }
+        }
+      }
+
+    };
+    this.shepherdService.modal = true;
+    this.shepherdService.confirmCancel = false;
+
+    this.shepherdService.addSteps([
+      {
+        id: 'firstStep',
+        text: 'Gracias por utilizar la aplicación y espero que te sea de utilidad, te voy a dar un recorrido breve para que aprendas a utilizarla',
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ],
+      },
+      {
+        text: `Acá están las opciones para modificar el membrete del examen, hace click para abrir el popup`,
+        attachTo: { element: '#buttonModal', on: 'left' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action: () => {
+              this.mostrarModal = true;
+
+              return setTimeout(() => {
+                this.shepherdService.next();
+              }, 1);
+            }
+          }
+        ],
+      },
+      {
+        text: `
+        Estos son todos los campos que pueden modificarse en el membrete
+        <br>
+        <br>
+        <strong>Institución</strong>: Nombre de la institución (opcional)
+        <br>
+        <br>
+        <strong>Logos de la institución</strong>: Logos de la institución, pueden colocarse varios o ninguno (opcional)
+        <br>
+        <br>
+        <strong>Examen</strong>: Nombre del examen a dictar (opcional)
+        <br>
+        <br>
+        <strong>Fecha</strong>: Fecha en la que va a ser dictado el examen
+        <br>
+        <br>
+        <strong>Duración</strong>: Duración del examen
+        <br>
+        <br>
+        <strong>Profesor</strong>: Nombre del profesor
+        <br>
+        <br>
+        <strong>Cátedra</strong>: Nombre de la cátedra o materia
+        <br>
+        <br>
+        <strong>DNI Alumno</strong>: Si se selecciona figura el campo DNI en el membrete
+        `,
+        attachTo: { element: '#modal', on: 'left' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action: () => {
+              this.mostrarModal = false;
+              return this.shepherdService.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action: () => {
+              this.mostrarModal = false;
+              return this.shepherdService.next();
+            }
+          }
+        ],
+      },
+      {
+        text: `
+        Acá se ingresan las preguntas
+        <br>
+        <br>
+        El patrón es:
+        <br> 
+        <br>
+        <strong>Pregunta</strong> - <strong>Puntaje</strong>  - <strong>Dificultad</strong>  (Fácil/Media/Difícil)
+        <br>
+        <strong>Preguntas</strong>  (opcional)
+        <br> 
+        <strong>Pulsar tecla enter</strong>
+        <br>
+        <br>
+        <strong>IMPORTANTE</strong>:
+        <br>
+        - Si no se colocan respuestas se colocará la pregunta sola
+        <br>
+        - Cuando se ingrese una pregunta debe hacerse enter para ingresar la siguiente
+        `,
+        attachTo: { element: '#preguntasTextarea', on: 'right' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action: () => {
+              this.mostrarModal = true;
+              return setTimeout(() => {
+                this.shepherdService.back();
+              }, 1);
+            }
+          }, {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ],
+      },
+      {
+        text: 'Cuando tengas ingresadas las preguntas clickea en este botón para guardarlas',
+        attachTo: { element: '#guardarPreguntas', on: 'right' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ]
+      },
+      {
+        text: `
+        Acá van las cantidades que desees, si no se ingresan valores no se puede generar el PDF
+        <br>
+        <br>
+        <strong>Cantidad de examenes</strong>: La cantidad de examenes a generar
+        <br>
+        <br>
+        <strong>Cantidad de preguntas por examen</strong>: La cantidad de preguntas que tiene cada examen
+        <br>
+        <br>
+        <strong>IMPORTANTE</strong>:
+        <br>
+        La cantidad de preguntas no puede ser mayor a la cantidad de preguntas ingresadas
+        `,
+        attachTo: { element: '#cantidades', on: 'right' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ]
+      },
+      {
+        text: 'Estos son los tres botones más importantes de la aplicación<br><br><strong>Verde</strong>: Descarga un excel con las preguntas del examen<br><br><strong>Amarillo</strong>: Sirve para cargar el excel que descargaste y no tengas que volver a escribir las preguntas<br><br><strong>Rojo</strong>: Genera el PDF con los exámenes',
+        attachTo: { element: '#botones', on: 'right' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ]
+      },
+      {
+        text: 'De este otro lado van a estar listadas las preguntas que hayas agregado',
+        attachTo: { element: '#listadoPreguntas', on: 'left' },
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Siguiente',
+            action() {
+              return this.next();
+            }
+          }
+        ]
+      },
+      {
+        text: 'Éxitos y cualquier duda o sugerencia a alejandrojorba123@gmail.com',
+        modalOverlayOpeningPadding: 10,
+        floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+        buttons: [
+          {
+            text: 'Anterior',
+            action() {
+              return this.back();
+            }
+          },
+          {
+            text: 'Finalizar',
+            action() {
+              return this.next();
+            }
+          }
+        ]
+      },
+    ]);
+
+    const userAgent = navigator.userAgent;
+    // Verifica si el userAgent contiene cadenas que indican un dispositivo móvil
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
+
+    if (!this.tutorialSeen && !isMobile) {
+      // Iniciar el tutorial
+      this.shepherdService.start();
+      localStorage.setItem('tutorialSeen', 'true');
+    }
   }
 
   ngOnInit() {
@@ -257,7 +540,7 @@ export class PreguntasComponent implements OnInit {
 
       // Nombre y DNI del alumno
       const alumnoP = document.createElement('p');
-      if(this.dniChecked) alumnoP.innerHTML = `<strong>Nombre:</strong> <span style="margin-left: 240px;"></span>| <strong>DNI:</strong>`;
+      if (this.dniChecked) alumnoP.innerHTML = `<strong>Nombre:</strong> <span style="margin-left: 240px;"></span>| <strong>DNI:</strong>`;
       else alumnoP.innerHTML = `<strong>Nombre:</strong>`;
       infoDiv.appendChild(alumnoP);
 
