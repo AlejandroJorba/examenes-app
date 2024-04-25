@@ -195,6 +195,8 @@ export class PreguntasComponent implements AfterViewInit {
         - Si no se colocan respuestas se colocará la pregunta sola
         <br>
         - Cuando se ingrese una pregunta debe hacerse enter para ingresar la siguiente
+        <br>
+        - Debe separarse entre guiones (-) la pregunta con sus demás valores, ejemplo: Es hoy miércoles? - 10 - Fácil
         `,
         attachTo: { element: '#preguntasTextarea', on: 'right' },
         modalOverlayOpeningPadding: 10,
