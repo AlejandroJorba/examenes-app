@@ -18,23 +18,26 @@ export class HeaderComponent {
   duracion: string = '';
   profesor: string = '';
   catedra: string = '';
+  dniChecked: boolean = true;
+
   logoFiles: File[] = [];
 
   guardarDatosHeader() {
     // Emitir los datos ingresados a través del evento `guardarHeader`
     this.guardarHeader.emit({
-        institucion: this.institucion,
-        examen: this.examen,
-        fecha: this.fecha,
-        duracion: this.duracion,
-        profesor: this.profesor,
-        catedra: this.catedra,
-        logoFile: this.logoFiles
+      institucion: this.institucion,
+      examen: this.examen,
+      fecha: this.fecha,
+      duracion: this.duracion,
+      profesor: this.profesor,
+      catedra: this.catedra,
+      logoFile: this.logoFiles,
+      dniChecked: this.dniChecked
     });
 
     // Cerrar el modal
     this.cerrarModal.emit();
-}
+  }
   onClose(): void {
     this.cerrarModal.emit(); // Usa emit() para emitir el evento
   }
@@ -42,10 +45,10 @@ export class HeaderComponent {
   onLogoChange(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const file = inputElement.files && inputElement.files[0];
-    
+
     if (file) {
-        this.logoFiles.push(file);
+      this.logoFiles.push(file);
     }
-}
+  }
 
 }

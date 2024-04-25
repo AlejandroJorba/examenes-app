@@ -1,5 +1,5 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto">
         <h2 class="text-2xl font-semibold mb-4">Ingresar datos del membrete</h2>
         <form (ngSubmit)="guardarDatosHeader()" class="space-y-4">
             <!-- Campos para ingresar datos del header -->
@@ -9,27 +9,35 @@
             </div>
             <div>
                 <label for="logo" class="block font-semibold mb-2">Logo de la institución:</label>
-                <input type="file" id="logoInput" (change)="onLogoChange($event)" multiple accept="image/*" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                <input type="file" id="logoInput" (change)="onLogoChange($event)" accept="image/*" class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
             </div>
             <div>
                 <label for="examen" class="block font-semibold mb-2">Examen:</label>
                 <input type="text" id="examen" [(ngModel)]="examen" name="examen" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
             </div>
-            <div>
-                <label for="fecha" class="block font-semibold mb-2">Fecha:</label>
-                <input type="date" id="fecha" [(ngModel)]="fecha" name="fecha" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex-1">
+                    <label for="fecha" class="block font-semibold mb-2">Fecha:</label>
+                    <input type="date" id="fecha" [(ngModel)]="fecha" name="fecha" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex-1">
+                    <label for="duracion" class="block font-semibold mb-2">Duración:</label>
+                    <input type="text" id="duracion" [(ngModel)]="duracion" name="duracion" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                </div>
+            </div>            
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex-1">
+                    <label for="profesor" class="block font-semibold mb-2">Profesor:</label>
+                    <input type="text" id="profesor" [(ngModel)]="profesor" name="profesor" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex-1">
+                    <label for="catedra" class="block font-semibold mb-2">Cátedra:</label>
+                    <input type="text" id="catedra" [(ngModel)]="catedra" name="catedra" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+                </div>
             </div>
-            <div>
-                <label for="duracion" class="block font-semibold mb-2">Duración:</label>
-                <input type="text" id="duracion" [(ngModel)]="duracion" name="duracion" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
-            </div>
-            <div>
-                <label for="profesor" class="block font-semibold mb-2">Profesor:</label>
-                <input type="text" id="profesor" [(ngModel)]="profesor" name="profesor" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
-            </div>
-            <div>
-                <label for="catedra" class="block font-semibold mb-2">Cátedra:</label>
-                <input type="text" id="catedra" [(ngModel)]="catedra" name="catedra" required class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
+            <div class="flex items-center mb-4">
+                <input type="checkbox" id="dniCheckbox" [(ngModel)]="dniChecked" name="dniCheckbox" class="w-4 h-4 text-blue-700 bg-gray-600 border-gray-300 rounded">
+                <label for="dniCheckbox" class="ms-2 font-semibold">DNI Alumno</label>
             </div>
             <!-- Botones para guardar o cancelar -->
             <div class="flex justify-end space-x-4">

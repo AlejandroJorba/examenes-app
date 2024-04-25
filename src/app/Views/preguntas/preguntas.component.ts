@@ -37,6 +37,7 @@ export class PreguntasComponent implements OnInit {
   duracion: string = '';
   profesor: string = '';
   catedra: string = '';
+  dniChecked: boolean = true;
   logoFiles: File[] = [];
 
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService) {
@@ -69,6 +70,7 @@ export class PreguntasComponent implements OnInit {
     this.profesor = datos.profesor;
     this.catedra = datos.catedra;
     this.logoFiles = datos.logoFile;
+    this.dniChecked = datos.dniChecked;
     // Cerrar el modal después de actualizar los datos
     this.mostrarModal = false;
   }
@@ -253,9 +255,10 @@ export class PreguntasComponent implements OnInit {
       instructorP.innerHTML = `<strong>Profesor:</strong> ${this.profesor} | <strong>Cátedra:</strong> ${this.catedra}`;
       infoDiv.appendChild(instructorP);
 
-      // Instructor y código del curso
+      // Nombre y DNI del alumno
       const alumnoP = document.createElement('p');
-      alumnoP.innerHTML = `<strong>Nombre:</strong> <span style="margin-left: 240px;"></span>| <strong>DNI:</strong>`;
+      if(this.dniChecked) alumnoP.innerHTML = `<strong>Nombre:</strong> <span style="margin-left: 240px;"></span>| <strong>DNI:</strong>`;
+      else alumnoP.innerHTML = `<strong>Nombre:</strong>`;
       infoDiv.appendChild(alumnoP);
 
 
