@@ -10,6 +10,7 @@ import { HeaderComponent } from '../header/header.component';
 import { Observable } from 'rxjs';
 import { ShepherdService } from 'angular-shepherd';
 import { offset } from '@floating-ui/dom';
+import { HeaderService } from '../../Services/HeaderService';
 
 @Component({
   selector: 'app-preguntas',
@@ -19,6 +20,13 @@ import { offset } from '@floating-ui/dom';
 })
 export class PreguntasComponent implements AfterViewInit {
 
+  mapeoDificultad: { [key: string]: string } = {
+    facil: 'Fácil',
+    fácil: 'Fácil',
+    media: 'Media',
+    dificil: 'Difícil',
+    difícil: 'Difícil',
+  };
   tutorialSeen = localStorage.getItem('tutorialSeen');
   // Define el formulario para agregar preguntas
   questionForm: FormGroup;
@@ -43,7 +51,7 @@ export class PreguntasComponent implements AfterViewInit {
   dniChecked: boolean = true;
   logoFiles: File[] = [];
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private shepherdService: ShepherdService) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private headerDataService: HeaderService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
     Pregunta 1 - 10 - fácil
     Respuesta 1.1
@@ -343,9 +351,6 @@ export class PreguntasComponent implements AfterViewInit {
     }
   }
 
-  ngOnInit() {
-  }
-
   actualizarHeader(datos: any): void {
     // Actualizar las variables del componente con los datos recibidos del modal
     this.institucion = datos.institucion;
@@ -396,6 +401,18 @@ export class PreguntasComponent implements AfterViewInit {
     const respuestasArray = this.questionForm.get('respuestas') as FormArray;
     respuestasArray.removeAt(index);
   }
+
+  // Función para normalizar la dificultad
+  normalizarDificultad(difficulty: string): string {
+    // Elimina los acentos y convierte a minúsculas
+    return difficulty.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+
+  // Función para verificar si la dificultad coincide
+  verificarDificultad(pregunta: any, expectedDifficulty: string): boolean {
+    return this.normalizarDificultad(pregunta.dificultad) === expectedDifficulty;
+  }
+
 
   convertToExcelData() {
     const excelData: { Pregunta: string; Respuestas: string; }[] = [];
@@ -468,7 +485,6 @@ export class PreguntasComponent implements AfterViewInit {
     // Lee el archivo como un binary string
     reader.readAsBinaryString(file);
   }
-
 
   public async generarPDF(): Promise<void> {
     this.cargandoPDF = true;
@@ -628,8 +644,10 @@ export class PreguntasComponent implements AfterViewInit {
     this.cargandoPDF = false;
     // Imprimir el examen (solo el contenido actual)
     await new Promise(r => setTimeout(r, 1000));
+    document.title = this.institucion != "" ? `${this.examen}-${this.institucion}` : `${this.profesor}-${this.examen}`;
     window.print();
-    htmlDiv.remove()
+    htmlDiv.remove();
+    document.title = 'EvaluAr';
   }
 
   convertFileToBase64(file: File): Observable<string> {
@@ -670,17 +688,19 @@ export class PreguntasComponent implements AfterViewInit {
 
       // Dividir la primera línea por guion
       const [pregunta, puntaje, dificultad] = preguntaHeader.split(' - ');
+      const dificultadNormalizada = dificultad?.toLowerCase();
+      const dificultadExacta = this.mapeoDificultad[dificultadNormalizada] || dificultad;
 
       // Crear un objeto Pregunta
       const nuevaPregunta: Pregunta = {
         pregunta: pregunta.trim(),
         puntaje: puntaje?.trim(),
-        dificultad: dificultad?.trim(),
+        dificultad: dificultadExacta,
         respuesta: respuestas.map(respuesta => respuesta.trim()).filter(respuesta => respuesta !== ''),
       };
 
       // Agregar la pregunta a la lista
-      this.preguntasList.push(nuevaPregunta);
+      preguntasList.push(nuevaPregunta);
     });
 
     this.questionForm.reset();

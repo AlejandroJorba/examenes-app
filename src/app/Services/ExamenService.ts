@@ -54,17 +54,10 @@ export class ExamService {
                 let preguntasSeleccionadas: Pregunta[] = [];
                 // Seleccionar preguntas de forma aleatoria hasta alcanzar el número deseado
                 while (preguntasSeleccionadas.length < preguntasPorExamen) {
-                    // Verificar que hay preguntas disponibles
-                    if (preguntas.length === 0) {
-                        console.warn("No hay suficientes preguntas disponibles para generar un examen completo.");
-                        break;
-                    }
-
-                    // Seleccionar un índice aleatorio de la lista de todas las preguntas
-                    const indiceAleatorio = Math.floor(Math.random() * preguntas.length);
-
                     // Seleccionar la pregunta correspondiente
-                    const preguntaSeleccionada = preguntas[indiceAleatorio];
+                    let preguntaSeleccionada = this.getRandomQuestion(preguntas);
+                    let respuestasMezcladas = this.mezclarArray(preguntaSeleccionada.respuesta);
+                    preguntaSeleccionada.respuesta = respuestasMezcladas;
 
                     // Verificar si la pregunta ya ha sido seleccionada comparando el contenido
                     const existePregunta = preguntasSeleccionadas.some(p =>
@@ -95,18 +88,21 @@ export class ExamService {
 
 
     // Método para obtener una pregunta aleatoria
-    getRandomQuestion(preguntas: Pregunta[]): any {
+    getRandomQuestion(preguntas: Pregunta[]): Pregunta {
         const randomIndex = Math.floor(Math.random() * preguntas.length);
         return preguntas[randomIndex];
     }
 
     // Método para mezclar un array
-    mezclarArray<T>(array: T[]): T[] {
-        for (let i = array.length - 1; i > 0; i--) {
+ mezclarArray<T>(array: T[]): T[] {
+        const resultado = [...array];
+        for (let i = resultado.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]]; // Intercambiar elementos
+            // Intercambiar elementos
+            const temp = resultado[i];
+            resultado[i] = resultado[j];
+            resultado[j] = temp;
         }
-        return array;
+        return resultado;
     }
-
 }

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HeaderService } from '../../Services/HeaderService';
 
 @Component({
   selector: 'app-header',
@@ -22,9 +23,24 @@ export class HeaderComponent {
 
   logoFiles: File[] = [];
 
+  constructor(private headerDataService: HeaderService)
+  {
+    const headerData = this.headerDataService.getHeaderData();
+    if (headerData) {
+      this.institucion = headerData.institucion;
+      this.examen = headerData.examen;
+      this.fecha = headerData.fecha;
+      this.duracion = headerData.duracion;
+      this.profesor = headerData.profesor;
+      this.catedra = headerData.catedra;
+      this.dniChecked = headerData.dniChecked;
+      this.logoFiles = headerData.logoFile;
+    }
+
+  }
+
   guardarDatosHeader() {
-    // Emitir los datos ingresados a través del evento `guardarHeader`
-    this.guardarHeader.emit({
+    const data = {
       institucion: this.institucion,
       examen: this.examen,
       fecha: this.fecha,
@@ -33,11 +49,19 @@ export class HeaderComponent {
       catedra: this.catedra,
       logoFile: this.logoFiles,
       dniChecked: this.dniChecked
-    });
+    };
+
+    // Guardar los datos en el servicio
+    this.headerDataService.setHeaderData(data);
+
+    // Emitir los datos a través del evento `guardarHeader`
+    this.guardarHeader.emit(data);
 
     // Cerrar el modal
     this.cerrarModal.emit();
   }
+
+  
   onClose(): void {
     this.cerrarModal.emit(); // Usa emit() para emitir el evento
   }
