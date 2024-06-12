@@ -20,59 +20,95 @@ body {
 
 /* Estilos para las burbujas */
 .shepherd-element {
-    background-color: #f8f8f8; /* Cambia el color de fondo */
-    border: 1px solid #ccc; /* Cambia el color del borde */
-    border-radius: 5px; /* Ajusta el radio de borde para las esquinas redondeadas */
+    background-color: #f8f8f8;
+    /* Cambia el color de fondo */
+    border: 1px solid #ccc;
+    /* Cambia el color del borde */
+    border-radius: 5px;
+    /* Ajusta el radio de borde para las esquinas redondeadas */
 }
 
 /* Estilos para el título */
 .shepherd-title {
-    font-weight: bold; /* Haz que el título sea más prominente */
-    color: #333; /* Ajusta el color del texto */
+    font-weight: bold;
+    /* Haz que el título sea más prominente */
+    color: #333;
+    /* Ajusta el color del texto */
 }
 
 .shepherd-footer {
-    display: flex; /* Utiliza flexbox para alinear los botones */
-    justify-content: end; /* Coloca el botón al final del contenedor */
+    display: flex;
+    /* Utiliza flexbox para alinear los botones */
+    justify-content: end;
+    /* Coloca el botón al final del contenedor */
 }
 
 /* Condición para cuando hay dos o más botones */
 .shepherd-footer.multiple-buttons {
-    justify-content: space-between; /* Coloca los botones en los extremos */
+    justify-content: space-between;
+    /* Coloca los botones en los extremos */
 }
 
 /* Estilos para los botones individuales */
 .shepherd-button {
-    background-color: #f4f4f4; /* Cambia el color de fondo de los botones */
-    color: #424242; /* Ajusta el color del texto del botón */
-    border-radius: 5px; /* Ajusta el radio de borde de los botones */
-    padding: 8px 16px; /* Ajusta el espacio alrededor del texto */
-    border: 1px solid #bdbdbd; /* Cambia el color y grosor de la línea según tus preferencias */
+    background-color: #f4f4f4;
+    /* Cambia el color de fondo de los botones */
+    color: #424242;
+    /* Ajusta el color del texto del botón */
+    border-radius: 5px;
+    /* Ajusta el radio de borde de los botones */
+    padding: 8px 16px;
+    /* Ajusta el espacio alrededor del texto */
+    border: 1px solid #bdbdbd;
+    /* Cambia el color y grosor de la línea según tus preferencias */
 }
 
 /* Estilos para la línea divisoria entre botones */
 .shepherd-text {
-    border-bottom: 1px solid #ccc; /* Agrega una línea divisoria entre los botones */
-    margin-bottom: 10px; /* Ajusta el espacio entre los botones */
+    border-bottom: 1px solid #ccc;
+    /* Agrega una línea divisoria entre los botones */
+    margin-bottom: 10px;
+    /* Ajusta el espacio entre los botones */
 }
 
 .shepherd-element .shepherd-button:hover {
-    background-color: #E0E0E0; /* Mantiene el color de fondo original */
+    background-color: #E0E0E0;
+    /* Mantiene el color de fondo original */
     color: black;
 }
 
 .shepherd-text {
-    padding: 20px; /* Cambia el valor según tus preferencias */
+    padding: 20px;
+    /* Cambia el valor según tus preferencias */
 }
 
-.shepherd-header{
+.shepherd-header {
     padding-top: 0px;
     padding-right: 0px;
     padding-left: 0px;
 }
 
-.shepherd-cancel-icon{
+.shepherd-cancel-icon {
     visibility: hidden;
     padding-right: 10px;
     padding-top: 5px;
+}
+
+/* Estilos para la barra de desplazamiento vertical */
+::-webkit-scrollbar {
+    width: 8px;
+    /* Ancho de la barra de desplazamiento */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    /* Color de fondo de la pista de desplazamiento */
+}
+
+::-webkit-scrollbar-thumb {
+    background: gray;
+    /* Color del "pulgón" de la barra de desplazamiento */
+    border-radius: 5px;
+    /* Borde redondeado */
+    cursor: auto;
 }

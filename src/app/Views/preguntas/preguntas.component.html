@@ -80,14 +80,14 @@
             <div id="cantidades">
                 <!-- Campo para la cantidad de exámenes -->
                 <div>
-                    <label for="cantidadExamenes" class="block font-semibold mb-2">Cantidad de exámenes a crear:</label>
+                    <label for="cantidadExamenes" class="block font-semibold mb-2">Cantidad de evaluaciones a crear:</label>
                     <input type="number" [(ngModel)]="cantidadExamenes"
                         class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
                 </div>
                 <!-- Campo para la cantidad de preguntas -->
                 <div class="mt-2" *ngIf="criterioSeleccionado === 'questionsPerExam'">
                     <label for="preguntasPorExamen" class="block font-semibold mb-2">Cantidad de preguntas por
-                        examen:</label>
+                        evaluación:</label>
                     <input type="number" [(ngModel)]="preguntasPorExamen"
                         class="w-full border rounded p-2 focus:outline-none focus:border-blue-500">
                 </div>

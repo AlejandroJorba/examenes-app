@@ -53,14 +53,15 @@ export class PreguntasComponent implements AfterViewInit {
 
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private headerDataService: HeaderService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
-    Pregunta 1 - 10 - fácil
-    Respuesta 1.1
-    Respuesta 1.2
+    Qué gusto tiene la sal? - 10 - fácil
+    Salada
+    Amarga
+    Dulce
     
-    Pregunta 2 - 20 - media
-    Respuesta 2.1
-    Respuesta 2.2
-    Respuesta 2.3
+    Cuántos años tiene Mirtha Legrand? - 20 - difícil
+    98
+    95
+    97
 `;
 
     // Inicializa el formulario para agregar preguntas
@@ -112,7 +113,7 @@ export class PreguntasComponent implements AfterViewInit {
         ],
       },
       {
-        text: `Acá están las opciones para modificar el membrete del examen, hace click para abrir el popup`,
+        text: `Acá están las opciones para modificar el membrete de la evaluación, hace click para abrir el popup`,
         attachTo: { element: '#buttonModal', on: 'left' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -251,10 +252,10 @@ export class PreguntasComponent implements AfterViewInit {
         Acá van las cantidades que desees, si no se ingresan valores no se puede generar el PDF
         <br>
         <br>
-        <strong>Cantidad de examenes</strong>: La cantidad de examenes a generar
+        <strong>Cantidad de evaluaciones</strong>: La cantidad de evaluaciones a generar
         <br>
         <br>
-        <strong>Cantidad de preguntas por examen</strong>: La cantidad de preguntas que tiene cada examen
+        <strong>Cantidad de preguntas por evaluación</strong>: La cantidad de preguntas que tiene cada evaluación
         <br>
         <br>
         <strong>IMPORTANTE</strong>:
@@ -280,7 +281,7 @@ export class PreguntasComponent implements AfterViewInit {
         ]
       },
       {
-        text: 'Estos son los tres botones más importantes de la aplicación<br><br><strong>Verde</strong>: Descarga un excel con las preguntas del examen<br><br><strong>Amarillo</strong>: Sirve para cargar el excel que descargaste y no tengas que volver a escribir las preguntas<br><br><strong>Rojo</strong>: Genera el PDF con los exámenes',
+        text: 'Estos son los tres botones más importantes de la aplicación<br><br><strong>Verde</strong>: Descarga un excel con las preguntas de la evaluación<br><br><strong>Amarillo</strong>: Sirve para cargar el excel que descargaste y no tengas que volver a escribir las preguntas<br><br><strong>Rojo</strong>: Genera el PDF con los exámenes',
         attachTo: { element: '#botones', on: 'right' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -536,25 +537,32 @@ export class PreguntasComponent implements AfterViewInit {
       }
 
       // Nombre de la institución
-      const universidadH1 = document.createElement('h1');
-      universidadH1.textContent = `${this.institucion}`;
-      universidadH1.classList.add('text-xl', 'font-bold');
-      infoDiv.appendChild(universidadH1);
+      if (this.institucion) {
+        const universidadH1 = document.createElement('h1');
+        universidadH1.textContent = `${this.institucion}`;
+        universidadH1.classList.add('text-xl', 'font-bold');
+        infoDiv.appendChild(universidadH1);
+      }
 
-      // Información del examen
-      const examenH2 = document.createElement('h2');
-      examenH2.textContent = `${this.examen}`;
-      infoDiv.appendChild(examenH2);
+      if (this.examen) {
+        // Información del examen
+        const examenH2 = document.createElement('h2');
+        examenH2.textContent = `${this.examen ?? ''}`;
+        infoDiv.appendChild(examenH2);
+      }
 
       // Fecha, duración y puntaje
       const fechaP = document.createElement('p');
-      fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Duración:</strong> ${this.duracion} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
+      if (this.duracion) fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Duración:</strong> ${this.duracion ?? ''} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
+      else fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
       infoDiv.appendChild(fechaP);
 
-      // Instructor y código del curso
-      const instructorP = document.createElement('p');
-      instructorP.innerHTML = `<strong>Profesor:</strong> ${this.profesor} | <strong>Cátedra:</strong> ${this.catedra}`;
-      infoDiv.appendChild(instructorP);
+      if (this.profesor) {
+        // Instructor y código del curso
+        const instructorP = document.createElement('p');
+        instructorP.innerHTML = `<strong>Profesor:</strong> ${this.profesor ?? ''} | <strong>Cátedra:</strong> ${this.catedra ?? ''}`;
+        infoDiv.appendChild(instructorP);
+      }
 
       // Nombre y DNI del alumno
       const alumnoP = document.createElement('p');
@@ -647,7 +655,8 @@ export class PreguntasComponent implements AfterViewInit {
     document.title = this.institucion != "" ? `${this.examen}-${this.institucion}` : `${this.profesor}-${this.examen}`;
     window.print();
     htmlDiv.remove();
-    document.title = 'EvaluAr';
+    //document.title = 'EvaluAr';
+    document.title = 'ExamenApp';
   }
 
   convertFileToBase64(file: File): Observable<string> {
@@ -677,8 +686,6 @@ export class PreguntasComponent implements AfterViewInit {
     // Dividir el contenido del textarea por dobles saltos de línea
     const preguntasText = formData.preguntasTextarea.trim().split(/\n\s*\n/);
 
-    const preguntasList: Pregunta[] = [];
-
     preguntasText.forEach((preguntaTexto: string) => {
       // Dividir la pregunta y sus respuestas por saltos de línea
       const lines = preguntaTexto.split('\n');
@@ -700,7 +707,7 @@ export class PreguntasComponent implements AfterViewInit {
       };
 
       // Agregar la pregunta a la lista
-      preguntasList.push(nuevaPregunta);
+      this.preguntasList.push(nuevaPregunta);
     });
 
     this.questionForm.reset();
