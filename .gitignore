@@ -40,3 +40,11 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Ignorar archivo de entorno de TypeScript
+src/environments/
+
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json

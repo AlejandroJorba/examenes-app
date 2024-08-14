@@ -7,7 +7,7 @@ body {
 
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 @media print {
@@ -112,3 +112,8 @@ body {
     /* Borde redondeado */
     cursor: auto;
 }
+
+html {
+    scroll-behavior: smooth;
+  }
+  

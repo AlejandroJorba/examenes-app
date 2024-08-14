@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { ShepherdService } from 'angular-shepherd';
 import { offset } from '@floating-ui/dom';
 import { HeaderService } from '../../Services/HeaderService';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-preguntas',

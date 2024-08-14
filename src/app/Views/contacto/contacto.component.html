@@ -1,0 +1,35 @@
+<div id="contacto" class="bg-white">
+<section class="bg-white py-8 lg:py-16 px-4 mx-auto max-w-screen-xl">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Text Section -->
+        <div class="flex-1 flex flex-col justify-center p-4 sm:items-start sm:text-left items-center text-center">
+            <h2 class="mb-4 text-4xl font-extrabold text-gray-900">Contacto</h2>
+            <p class="mb-8 text-gray-500 sm:text-lg max-w-lg">
+                ¿Tenes un problema técnico? ¿Queres sugerir nuevas funcionalidades? ¿Necesitas información sobre nuestras herramientas? Escribinos.
+            </p>
+            <p class="text-gray-700 max-w-lg">
+                Estamos aquí para ayudarte. Envia tus comentarios, errores o sugerencias para poder mejorar juntos el portal.
+            </p>
+        </div>
+        
+        
+        <div class="flex-1 bg-gray-50 p-6 rounded-lg shadow-md">
+            <form action="#" class="space-y-6" [formGroup]="sugerenciaForm">
+                <div>
+                    <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Mail</label>
+                    <input formControlName="email" type="email" id="email" class="shadow-sm bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="name@domain.com" required>
+                </div>
+                <div>
+                    <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Nombre</label>
+                    <input formControlName="nombre" type="text" id="subject" class="block p-3 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Coloque su nombre para poder ayudarle" required>
+                </div>
+                <div>
+                    <label for="message" class="block mb-2 text-sm font-medium text-gray-900">Mensaje</label>
+                    <textarea formControlName="mensaje" id="message" rows="6" class="block p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg shadow-sm border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Escriba su mensaje o sugerencia..."></textarea>
+                </div>
+                <button (click)="enviarSugerencia()" type="submit" class="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-indigo-600 hover:bg-indigo-500">Enviar</button>
+            </form>
+        </div>
+    </div>
+</section>
+</div>
