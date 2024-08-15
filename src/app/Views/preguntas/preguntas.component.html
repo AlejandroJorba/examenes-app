@@ -10,6 +10,7 @@
                         <!-- Muestra la pregunta con su índice -->
                         <div class="font-semibold text-lg">{{ i + 1 }}. {{ pregunta.pregunta }}</div>
                         <!-- Muestra el puntaje y la dificultad -->
+                    <!-- 
                         <div class="flex items-center space-x-2">
                             <span *ngIf="pregunta.puntaje != undefined" class="text-sm text-gray-600">({{
                                 pregunta.puntaje }} pts)</span>
@@ -23,6 +24,7 @@
                                 {{ pregunta.dificultad | titlecase }}
                             </span>
                         </div>
+                    -->
                     </div>
                     <ul class="list-[lower-alpha] pl-6">
                         <!-- Itera sobre las respuestas y las muestra en una lista -->
@@ -130,7 +132,7 @@
 
                 <!-- Botón para descargar PDF -->
                 <button id="descargarPDF" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600"
-                    (click)="generarPDF()">
+                    (click)="generarPDF()" >
                     <i *ngIf="!cargandoPDF" class="fas fa-file-pdf"></i>
                     <div *ngIf="cargandoPDF"
                         class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white">
@@ -141,3 +143,4 @@
         </div>
     </div>
 </div>
+<app-loading-print class="no-print" *ngIf="loading"></app-loading-print>

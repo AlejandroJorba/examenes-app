@@ -12,11 +12,12 @@ import { ShepherdService } from 'angular-shepherd';
 import { offset } from '@floating-ui/dom';
 import { HeaderService } from '../../Services/HeaderService';
 import { RouterOutlet } from '@angular/router';
+import { LoadingPrintComponent } from '../loading-print/loading-print.component';
 
 @Component({
   selector: 'app-preguntas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent, LoadingPrintComponent],
   templateUrl: './preguntas.component.html'
 })
 export class PreguntasComponent implements AfterViewInit {
@@ -28,7 +29,10 @@ export class PreguntasComponent implements AfterViewInit {
     dificil: 'Difícil',
     difícil: 'Difícil',
   };
+
+  // Sheperd data
   tutorialSeen = localStorage.getItem('tutorialSeen');
+  information = localStorage.getItem('information');
   // Define el formulario para agregar preguntas
   questionForm: FormGroup;
   // Lista de preguntas agregadas
@@ -49,17 +53,21 @@ export class PreguntasComponent implements AfterViewInit {
   duracion: string = '';
   profesor: string = '';
   catedra: string = '';
-  dniChecked: boolean = true;
+  dniChecked: boolean = false;
+  puntosChecked: boolean = false;
   logoFiles: File[] = [];
+
+  // Mostrar la pantalla de carga
+  loading: boolean = false;
 
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private headerDataService: HeaderService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
-    Qué gusto tiene la sal? - 10 - fácil
+    Qué gusto tiene la sal?
     Salada
     Amarga
     Dulce
     
-    Cuántos años tiene Mirtha Legrand? - 20 - difícil
+    Cuántos años tiene Mirtha Legrand?
     98
     95
     97
@@ -95,13 +103,14 @@ export class PreguntasComponent implements AfterViewInit {
       }
 
     };
+
     this.shepherdService.modal = true;
     this.shepherdService.confirmCancel = false;
 
     this.shepherdService.addSteps([
       {
         id: 'firstStep',
-        text: 'Gracias por utilizar la aplicación y espero que te sea de utilidad, te voy a dar un recorrido breve para que aprendas a utilizarla',
+        text: 'Gracias por elegir nuestra aplicación. Te voy a guiar en un recorrido breve para que puedas aprovechar todas sus funcionalidades.',
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
         buttons: [
@@ -114,7 +123,7 @@ export class PreguntasComponent implements AfterViewInit {
         ],
       },
       {
-        text: `Acá están las opciones para modificar el membrete de la evaluación, hace click para abrir el popup`,
+        text: `Acá podés modificar el membrete de la evaluación. Hacé clic para abrir el popup.`,
         attachTo: { element: '#buttonModal', on: 'left' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -139,31 +148,25 @@ export class PreguntasComponent implements AfterViewInit {
       },
       {
         text: `
-        Estos son todos los campos que pueden modificarse en el membrete
-        <br>
-        <br>
-        <strong>Institución</strong>: Nombre de la institución (opcional)
-        <br>
-        <br>
-        <strong>Logos de la institución</strong>: Logos de la institución, pueden colocarse varios o ninguno (opcional)
-        <br>
-        <br>
-        <strong>Examen</strong>: Nombre del examen a dictar (opcional)
-        <br>
-        <br>
-        <strong>Fecha</strong>: Fecha en la que va a ser dictado el examen
-        <br>
-        <br>
-        <strong>Duración</strong>: Duración del examen
-        <br>
-        <br>
-        <strong>Profesor</strong>: Nombre del profesor
-        <br>
-        <br>
-        <strong>Cátedra</strong>: Nombre de la cátedra o materia
-        <br>
-        <br>
-        <strong>DNI Alumno</strong>: Si se selecciona figura el campo DNI en el membrete
+        Estos son los campos que podés modificar en el membrete. Todos son opcionales, y si no se completan, se mostrarán automáticamente la fecha, el puntaje total y el nombre del examen.
+        <br><br>
+        <strong>Institución:</strong> Ingresá el nombre de la institución.
+        <br><br>
+        <strong>Logos de la institución:</strong> Podés agregar uno o varios logos de la institución.
+        <br><br>
+        <strong>Examen:</strong> Indicá el nombre del examen.
+        <br><br>
+        <strong>Fecha:</strong> Seleccioná la fecha del examen.
+        <br><br>
+        <strong>Duración:</strong> Indicá la duración del examen.
+        <br><br>
+        <strong>Profesor:</strong> Ingresá el nombre del profesor.
+        <br><br>
+        <strong>Cátedra:</strong> Indicá el nombre de la cátedra o materia.
+        <br><br>
+        <strong>DNI Alumno:</strong> Si seleccionas esta opción, se incluirá el campo DNI en el membrete.
+        <br><br>
+        <strong>Puntos:</strong> Si seleccionas esta opción, se mostrarán los puntos asignados a cada pregunta, calculados automáticamente como 100 dividido por la cantidad de preguntas.
         `,
         attachTo: { element: '#modal', on: 'left' },
         modalOverlayOpeningPadding: 10,
@@ -187,26 +190,21 @@ export class PreguntasComponent implements AfterViewInit {
       },
       {
         text: `
-        Acá se ingresan las preguntas
+        Acá se ingresan las preguntas.
+        <br><br>
+        El formato a seguir es:
+        <br><br>
+        <strong>Pregunta:</strong>
         <br>
+        <strong>Opciones de respuesta</strong> <span class="text-sm text-gray-500">(opcional)</span>
         <br>
-        El patrón es:
-        <br> 
+        <strong>Presionar la tecla Enter</strong> para agregar la siguiente pregunta.
+        <br><br>
+        <strong>IMPORTANTE:</strong>
         <br>
-        <strong>Pregunta</strong> - <strong>Puntaje</strong>  - <strong>Dificultad</strong>  (Fácil/Media/Difícil)
+        - Si no se agregan opciones de respuesta, solo se mostrará la pregunta.
         <br>
-        <strong>Preguntas</strong>  (opcional)
-        <br> 
-        <strong>Pulsar tecla enter</strong>
-        <br>
-        <br>
-        <strong>IMPORTANTE</strong>:
-        <br>
-        - Si no se colocan respuestas se colocará la pregunta sola
-        <br>
-        - Cuando se ingrese una pregunta debe hacerse enter para ingresar la siguiente
-        <br>
-        - Debe separarse entre guiones (-) la pregunta con sus demás valores, ejemplo: Es hoy miércoles? - 10 - Fácil
+        - Recordá presionar Enter después de ingresar cada pregunta para añadir la siguiente.
         `,
         attachTo: { element: '#preguntasTextarea', on: 'right' },
         modalOverlayOpeningPadding: 10,
@@ -229,7 +227,7 @@ export class PreguntasComponent implements AfterViewInit {
         ],
       },
       {
-        text: 'Cuando tengas ingresadas las preguntas clickea en este botón para guardarlas',
+        text: 'Una vez que hayas ingresado todas las preguntas, hacé clic en este botón para guardarlas.',
         attachTo: { element: '#guardarPreguntas', on: 'right' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -250,18 +248,16 @@ export class PreguntasComponent implements AfterViewInit {
       },
       {
         text: `
-        Acá van las cantidades que desees, si no se ingresan valores no se puede generar el PDF
+        Aquí es donde ingresás las cantidades deseadas. 
+        Si no se completan estos campos, no se podrá generar el PDF.
+        <br><br>
+        <strong>Cantidad de evaluaciones:</strong> Indica cuántas evaluaciones querés generar.
+        <br><br>
+        <strong>Cantidad de preguntas por evaluación:</strong> Define cuántas preguntas tendrá cada evaluación.
+        <br><br>
+        <strong>IMPORTANTE:</strong>
         <br>
-        <br>
-        <strong>Cantidad de evaluaciones</strong>: La cantidad de evaluaciones a generar
-        <br>
-        <br>
-        <strong>Cantidad de preguntas por evaluación</strong>: La cantidad de preguntas que tiene cada evaluación
-        <br>
-        <br>
-        <strong>IMPORTANTE</strong>:
-        <br>
-        La cantidad de preguntas no puede ser mayor a la cantidad de preguntas ingresadas
+        La cantidad de preguntas no puede superar el total de preguntas ingresadas.
         `,
         attachTo: { element: '#cantidades', on: 'right' },
         modalOverlayOpeningPadding: 10,
@@ -282,7 +278,15 @@ export class PreguntasComponent implements AfterViewInit {
         ]
       },
       {
-        text: 'Estos son los tres botones más importantes de la aplicación<br><br><strong>Verde</strong>: Descarga un excel con las preguntas de la evaluación<br><br><strong>Amarillo</strong>: Sirve para cargar el excel que descargaste y no tengas que volver a escribir las preguntas<br><br><strong>Rojo</strong>: Genera el PDF con los exámenes',
+        text: `
+        Estos son los tres botones más importantes de la aplicación:
+        <br><br>
+        <strong class="text-green-600">Verde:</strong> Descarga un Excel con las preguntas de la evaluación.
+        <br><br>
+        <strong class="text-yellow-600">Amarillo:</strong> Permite cargar el Excel que descargaste, evitando que tengas que volver a escribir las preguntas.
+        <br><br>
+        <strong class="text-red-600">Rojo:</strong> Genera el PDF con los exámenes.
+        `,
         attachTo: { element: '#botones', on: 'right' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -302,7 +306,7 @@ export class PreguntasComponent implements AfterViewInit {
         ]
       },
       {
-        text: 'De este otro lado van a estar listadas las preguntas que hayas agregado',
+        text: 'En esta sección se mostrarán todas las preguntas que hayas agregado.',
         attachTo: { element: '#listadoPreguntas', on: 'left' },
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
@@ -322,7 +326,10 @@ export class PreguntasComponent implements AfterViewInit {
         ]
       },
       {
-        text: 'Éxitos y cualquier duda o sugerencia a alejandrojorba123@gmail.com',
+        text: `
+        ¡Mucho éxito! Si tenés alguna duda o sugerencia, no dudes en <a href="#contacto" class="text-blue-600 hover:text-blue-800 underline">contactarnos</a>. 
+        Estamos para ayudarte en lo que necesites.
+      `,
         modalOverlayOpeningPadding: 10,
         floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
         buttons: [
@@ -351,6 +358,42 @@ export class PreguntasComponent implements AfterViewInit {
       this.shepherdService.start();
       localStorage.setItem('tutorialSeen', 'true');
     }
+
+    if (!isMobile && !this.information && this.tutorialSeen) {
+
+      this.shepherdService.addSteps([
+        {
+          id: 'firstStep',
+          text: `
+      <p>
+        Queremos informarles que hemos decidido <strong>eliminar tanto el puntaje como la dificultad</strong> de las preguntas, ya que por el momento no planeamos utilizarlos. 
+      </p>
+      <br>
+      <p>
+        Sin embargo, <em>no se preocupen</em>, los archivos Excel que contengan esta información <strong>pueden seguir utilizándose sin ningún problema</strong>, aunque ya no es necesario incluir esos datos.
+      </p>
+      <br>
+      <p>
+        ¡<strong>Muchas gracias</strong> por su comprensión y colaboración!
+      </p>
+`,
+          modalOverlayOpeningPadding: 10,
+          floatingUIOptions: { middleware: [offset({ mainAxis: 30, crossAxis: 40 })] },
+          attachTo: { element: '#preguntasTextarea', on: 'right' },
+          buttons: [
+            {
+              text: 'Finalizar',
+              action() {
+                return this.next();
+              }
+            }
+          ],
+        },
+      ])
+      this.shepherdService.start();
+      localStorage.setItem('information', 'true');
+    }
+
   }
 
   actualizarHeader(datos: any): void {
@@ -363,6 +406,7 @@ export class PreguntasComponent implements AfterViewInit {
     this.catedra = datos.catedra;
     this.logoFiles = datos.logoFile;
     this.dniChecked = datos.dniChecked;
+    this.puntosChecked = datos.puntosChecked;
     // Cerrar el modal después de actualizar los datos
     this.mostrarModal = false;
   }
@@ -423,8 +467,8 @@ export class PreguntasComponent implements AfterViewInit {
       // Aplanar los datos de pregunta, respuestas y respuestas correctas
       const preguntaRow = {
         Pregunta: pregunta.pregunta,
-        Puntaje: pregunta.puntaje,
-        Dificultad: pregunta.dificultad,
+        //Puntaje: pregunta.puntaje,
+        //Dificultad: pregunta.dificultad,
         Respuestas: pregunta.respuesta.join(', ')
       };
 
@@ -477,8 +521,8 @@ export class PreguntasComponent implements AfterViewInit {
         // Transforma los datos a Pregunta[] y los agrega a preguntasList
         this.preguntasList = excelData.map((row: any) => ({
           pregunta: row.Pregunta,
-          dificultad: row.Dificultad,
-          puntaje: row.Puntaje,
+          //dificultad: row.Dificultad,
+          //puntaje: row.Puntaje,
           respuesta: row.Respuestas.split(', ').map((r: string) => r.trim()),
         }));
       }
@@ -489,6 +533,7 @@ export class PreguntasComponent implements AfterViewInit {
   }
 
   public async generarPDF(): Promise<void> {
+    this.loading = true;
     this.cargandoPDF = true;
     // Obtener los parámetros del examen
     const cantExamenes = this.cantidadExamenes;
@@ -554,8 +599,10 @@ export class PreguntasComponent implements AfterViewInit {
 
       // Fecha, duración y puntaje
       const fechaP = document.createElement('p');
-      if (this.duracion) fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Duración:</strong> ${this.duracion ?? ''} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
-      else fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(new Date(this.fecha))} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
+      const date = this.fecha !== "" ? new Date(this.fecha) : new Date();
+      console.log(date);
+      if (this.duracion) fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(date)} | <strong>Duración:</strong> ${this.duracion ?? ''} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
+      else fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(date)} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
       infoDiv.appendChild(fechaP);
 
       if (this.profesor) {
@@ -608,7 +655,7 @@ export class PreguntasComponent implements AfterViewInit {
         puntajeSpan.classList.add('text-sm', 'font-bold', 'text-gray-600', 'ml-2'); // Personaliza las clases según tus preferencias
 
         // Asigna el texto que contiene el puntaje de la pregunta
-        puntajeSpan.textContent = ` (${pregunta.puntaje} pts)`;
+        if(this.puntosChecked) puntajeSpan.textContent = ` (${pregunta.puntaje} pts)`;
 
         // Añadir el span con el puntaje al div del título de la pregunta
         preguntaTitulo.appendChild(puntajeSpan);
@@ -656,8 +703,8 @@ export class PreguntasComponent implements AfterViewInit {
     document.title = this.institucion != "" ? `${this.examen}-${this.institucion}` : `${this.profesor}-${this.examen}`;
     window.print();
     htmlDiv.remove();
-    //document.title = 'EvaluAr';
-    document.title = 'ExamenApp';
+    document.title = 'EvaluAr';
+    this.loading = false;
   }
 
   convertFileToBase64(file: File): Observable<string> {
@@ -702,8 +749,8 @@ export class PreguntasComponent implements AfterViewInit {
       // Crear un objeto Pregunta
       const nuevaPregunta: Pregunta = {
         pregunta: pregunta.trim(),
-        puntaje: puntaje?.trim(),
-        dificultad: dificultadExacta,
+        //puntaje: puntaje?.trim(),
+        //dificultad: dificultadExacta,
         respuesta: respuestas.map(respuesta => respuesta.trim()).filter(respuesta => respuesta !== ''),
       };
 

@@ -19,7 +19,8 @@ export class HeaderComponent {
   duracion: string = '';
   profesor: string = '';
   catedra: string = '';
-  dniChecked: boolean = true;
+  dniChecked: boolean = false;
+  puntosChecked: boolean = false;
 
   logoFiles: File[] = [];
 
@@ -29,11 +30,12 @@ export class HeaderComponent {
     if (headerData) {
       this.institucion = headerData.institucion;
       this.examen = headerData.examen;
-      this.fecha = headerData.fecha;
+      this.fecha = headerData.fecha == undefined || headerData.fecha == "" ? this.getFechaActual() : headerData.fecha;
       this.duracion = headerData.duracion;
       this.profesor = headerData.profesor;
       this.catedra = headerData.catedra;
       this.dniChecked = headerData.dniChecked;
+      this.puntosChecked = headerData.puntosChecked;
       this.logoFiles = headerData.logoFile;
     }
 
@@ -48,7 +50,8 @@ export class HeaderComponent {
       profesor: this.profesor,
       catedra: this.catedra,
       logoFile: this.logoFiles,
-      dniChecked: this.dniChecked
+      dniChecked: this.dniChecked,
+      puntosChecked: this.puntosChecked,
     };
 
     // Guardar los datos en el servicio
@@ -74,5 +77,22 @@ export class HeaderComponent {
       this.logoFiles.push(file);
     }
   }
+
+  getFechaActual(): string {
+    // Obtener la fecha actual
+    const fechaActual = new Date();
+
+    // Convertir la fecha actual a la zona horaria de Argentina
+    const fechaArgentina = new Date(fechaActual.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+
+    // Extraer los componentes de la fecha
+    const anio = fechaArgentina.getFullYear();
+    const mes = String(fechaArgentina.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaArgentina.getDate()).padStart(2, '0');
+
+    // Formatear la fecha como YYYY-MM-DD
+    return `${anio}-${mes}-${dia}`;
+  }
+
 
 }

@@ -5,7 +5,7 @@ import { ContactoComponent } from './Views/contacto/contacto.component';
 
 export const routes: Routes = [
     {path: '', component: HomeComponent, pathMatch: 'full'},
-    {path: 'multiple-choice', component: PreguntasComponent},
+    {path: 'evaluaciones', component: PreguntasComponent},
     {path: 'contacto', component: ContactoComponent}
     
 ];
