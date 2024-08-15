@@ -19,6 +19,7 @@ export class ContactoComponent {
       nombre: new FormControl(""),
       email: new FormControl(""),
       mensaje: new FormControl(""),
+      fecha: new FormControl(new Date())
     })
   }
 

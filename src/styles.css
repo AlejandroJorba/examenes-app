@@ -20,6 +20,10 @@ body {
 
 /* Estilos para las burbujas */
 .shepherd-element {
+    max-height: 700px; /* Ajusta la altura según sea necesario */
+    overflow-y: auto; /* Habilita el desplazamiento vertical */
+    overflow-x: hidden; /* Evita el desplazamiento horizontal */
+    box-sizing: border-box; /* Asegura que el padding y border no afecten la altura */
     background-color: #f8f8f8;
     /* Cambia el color de fondo */
     border: 1px solid #ccc;
