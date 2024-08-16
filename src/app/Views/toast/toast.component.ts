@@ -17,7 +17,7 @@ export class ToastComponent implements OnInit{
     this.toastService.getToast().subscribe((toast) => {
       this.toast = toast;
       if (toast) {
-        //setTimeout(() => this.toast.active = false, 5000); // Oculta el toast después de 5 segundos
+        setTimeout(() => this.toast.active = false, 10000); // Oculta el toast después de 10 segundos
       }
     });
   }

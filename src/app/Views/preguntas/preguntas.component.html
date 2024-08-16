@@ -131,7 +131,7 @@
                     (change)="onFileChange($event)">
 
                 <!-- Botón para descargar PDF -->
-                <button id="descargarPDF" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600"
+                <button id="descargarPDF" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600 disabled"
                     (click)="generarPDF()" >
                     <i *ngIf="!cargandoPDF" class="fas fa-file-pdf"></i>
                     <div *ngIf="cargandoPDF"
@@ -144,3 +144,4 @@
     </div>
 </div>
 <app-loading-print class="no-print" *ngIf="loading"></app-loading-print>
+<app-toast></app-toast>

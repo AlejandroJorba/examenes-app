@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Pregunta } from '../../Interfaces/Pregunta';
@@ -13,14 +13,18 @@ import { offset } from '@floating-ui/dom';
 import { HeaderService } from '../../Services/HeaderService';
 import { RouterOutlet } from '@angular/router';
 import { LoadingPrintComponent } from '../loading-print/loading-print.component';
+import { ToastService } from '../../Services/ToastService';
+import { Toast } from '../../Interfaces/Toast';
+import { ToastComponent } from '../toast/toast.component';
 
 @Component({
   selector: 'app-preguntas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent, LoadingPrintComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatExpansionModule, HttpClientModule, FormsModule, HeaderComponent, LoadingPrintComponent, ToastComponent],
   templateUrl: './preguntas.component.html'
 })
 export class PreguntasComponent implements AfterViewInit {
+  toastService: ToastService = inject(ToastService);
 
   mapeoDificultad: { [key: string]: string } = {
     facil: 'Fácil',
@@ -30,6 +34,8 @@ export class PreguntasComponent implements AfterViewInit {
     difícil: 'Difícil',
   };
 
+  // La alerta
+  toast: Toast = { message: "", type: "", active: false };
   // Sheperd data
   tutorialSeen = localStorage.getItem('tutorialSeen');
   information = localStorage.getItem('information');
@@ -61,7 +67,7 @@ export class PreguntasComponent implements AfterViewInit {
   loading: boolean = false;
 
   // Saber si el usuario está en un celular
-  isMobile: boolean = false;
+  isMobile: boolean;
 
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private headerDataService: HeaderService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
@@ -75,6 +81,13 @@ export class PreguntasComponent implements AfterViewInit {
     95
     97
 `;
+    const userAgent = navigator.userAgent;
+    // Verifica si el userAgent contiene cadenas que indican un dispositivo móvil
+    this.isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
+    if (this.isMobile) {
+      this.toastService.showToast({ type: "info", message: "Recordá que la descarga del PDF no está disponible en dispositivos móviles.", active: true });
+    }
+
 
     // Inicializa el formulario para agregar preguntas
     this.questionForm = this.fb.group({
@@ -352,10 +365,6 @@ export class PreguntasComponent implements AfterViewInit {
       },
     ]);
 
-    const userAgent = navigator.userAgent;
-    // Verifica si el userAgent contiene cadenas que indican un dispositivo móvil
-    this.isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
-
     if (!this.tutorialSeen && !this.isMobile) {
       // Iniciar el tutorial
       this.shepherdService.start();
@@ -536,6 +545,10 @@ export class PreguntasComponent implements AfterViewInit {
   }
 
   public async generarPDF(): Promise<void> {
+    if (this.isMobile) {
+      this.toastService.showToast({ type: "error", message: "La descarga de evaluaciones no está disponible en dispositivos móviles. Por favor, utilice una computadora.", active: true });
+      return;
+    }
     this.loading = true;
     this.cargandoPDF = true;
     // Obtener los parámetros del examen
