@@ -60,6 +60,9 @@ export class PreguntasComponent implements AfterViewInit {
   // Mostrar la pantalla de carga
   loading: boolean = false;
 
+  // Saber si el usuario está en un celular
+  isMobile: boolean = false;
+
   constructor(private fb: FormBuilder, private http: HttpClient, private examService: ExamService, private headerDataService: HeaderService, private shepherdService: ShepherdService) {
     const valorInicialPreguntas = `
     Qué gusto tiene la sal?
@@ -351,15 +354,15 @@ export class PreguntasComponent implements AfterViewInit {
 
     const userAgent = navigator.userAgent;
     // Verifica si el userAgent contiene cadenas que indican un dispositivo móvil
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
+    this.isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(userAgent);
 
-    if (!this.tutorialSeen && !isMobile) {
+    if (!this.tutorialSeen && !this.isMobile) {
       // Iniciar el tutorial
       this.shepherdService.start();
       localStorage.setItem('tutorialSeen', 'true');
     }
 
-    if (!isMobile && !this.information && this.tutorialSeen) {
+    if (!this.isMobile && !this.information && this.tutorialSeen) {
 
       this.shepherdService.addSteps([
         {
@@ -543,7 +546,7 @@ export class PreguntasComponent implements AfterViewInit {
     // Generar exámenes utilizando el servicio
     const examenes = this.examService.generateExams(cantExamenes, cantPreguntas, puntaje, preguntas);
     const htmlDiv = document.createElement('div');
-
+    htmlDiv.id = "printDiv";
     // Iterar sobre cada examen
     for (let i = 0; i < examenes.length; i++) {
       const examen = examenes[i];
@@ -655,7 +658,7 @@ export class PreguntasComponent implements AfterViewInit {
         puntajeSpan.classList.add('text-sm', 'font-bold', 'text-gray-600', 'ml-2'); // Personaliza las clases según tus preferencias
 
         // Asigna el texto que contiene el puntaje de la pregunta
-        if(this.puntosChecked) puntajeSpan.textContent = ` (${pregunta.puntaje} pts)`;
+        if (this.puntosChecked) puntajeSpan.textContent = ` (${pregunta.puntaje} pts)`;
 
         // Añadir el span con el puntaje al div del título de la pregunta
         preguntaTitulo.appendChild(puntajeSpan);
