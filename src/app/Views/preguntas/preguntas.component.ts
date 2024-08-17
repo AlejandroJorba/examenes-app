@@ -616,7 +616,6 @@ export class PreguntasComponent implements AfterViewInit {
       // Fecha, duración y puntaje
       const fechaP = document.createElement('p');
       const date = this.fecha !== "" ? new Date(this.fecha) : new Date();
-      console.log(date);
       if (this.duracion) fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(date)} | <strong>Duración:</strong> ${this.duracion ?? ''} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
       else fechaP.innerHTML = `<strong>Fecha:</strong> ${this.formatDate(date)} | <strong>Puntaje:</strong><span style="margin-left: 40px;"></span>  puntos`;
       infoDiv.appendChild(fechaP);
@@ -644,7 +643,6 @@ export class PreguntasComponent implements AfterViewInit {
       const preguntasContainer = examenDiv.querySelector<HTMLElement>('#preguntasContainer');
 
       if (!preguntasContainer) {
-        console.error('No se encontró el contenedor de preguntas en el HTML cargado.');
         continue;
       }
 
@@ -716,12 +714,33 @@ export class PreguntasComponent implements AfterViewInit {
     this.cargandoPDF = false;
     // Imprimir el examen (solo el contenido actual)
     await new Promise(r => setTimeout(r, 1000));
-    document.title = this.institucion != "" ? `${this.examen}-${this.institucion}` : `${this.profesor}-${this.examen}`;
+    if(this.examen != "") document.title = this.institucion != "" ? `${this.examen}-${this.institucion}` : `${this.profesor}-${this.examen}`;
+    else document.title = "Evaluaciones";
+
+    if(this.isMobile){
+      var base64 = "";
+      var blob = new Blob([this.base64ToArrayBuffer(base64)], {type: 'application/pdf'});
+      var blobURL = URL.createObjectURL(blob);
+      window.open(blobURL);
+    }
+    
     window.print();
     htmlDiv.remove();
     document.title = 'EvaluAr';
     this.loading = false;
   }
+
+
+ base64ToArrayBuffer(base64: string) {
+    const binaryString = window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
 
   convertFileToBase64(file: File): Observable<string> {
     return new Observable(observer => {

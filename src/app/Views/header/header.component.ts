@@ -36,7 +36,7 @@ export class HeaderComponent {
       this.catedra = headerData.catedra;
       this.dniChecked = headerData.dniChecked;
       this.puntosChecked = headerData.puntosChecked;
-      this.logoFiles = headerData.logoFile;
+      this.logoFiles = headerData.logoFile == undefined ? [] : headerData.logoFile;
     }
 
   }

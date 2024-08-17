@@ -20,7 +20,6 @@ export class ExamService {
                 while (puntajeTotal < puntaje) {
                     // Verificar que hay preguntas disponibles
                     if (preguntas.length === 0) {
-                        console.warn("No hay suficientes preguntas disponibles para generar un examen completo.");
                         break;
                     }
 
