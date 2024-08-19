@@ -1,52 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Examen de Universidad</title>
     <style>
-        /* Estilo para el fondo del cuerpo */
         body {
-            background-color: #f3f4f6; /* bg-gray-100 */
+            background-color: white;
+            font-family: Arial, sans-serif;
         }
-        
-        /* Estilo para el contenedor principal */
-        .container {
-            padding: 1.5rem; /* Padding (p-6) */
-            margin: 0 auto; /* Centrando el contenedor */
+
+        .header-info {
+            text-align: start;
+            padding: 20px;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+            border-top: 2px solid #ccc;
+            margin-top: 20px;
+            background-color: white;
         }
-        
-        /* Estilo para el encabezado */
-        h2 {
-            font-size: 1.5rem; /* Tamaño de fuente (text-2xl) */
-            font-weight: bold; /* Negrita (font-bold) */
-            margin-bottom: 1rem; /* Margen inferior (mb-4) */
+
+        .header-info h1 {
+            font-size: 20px;
+            color: black;
+            margin: 0;
+            font-weight: bold;
         }
-        
-        /* Estilos para los divs de preguntas */
+
+        .header-info h2 {
+            font-size: 16px;
+            color: black;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .header-info p {
+            margin: 2px 0;
+            font-size: 13px;
+            color: black;
+        }
+
+        .header-info p strong {
+            color: black;
+        }
+
+        #preguntasContainer {
+            margin-top: 20px;
+        }
+
+        #preguntasContainer ul {
+            list-style-type: none;
+        }
+
         .mb-6 {
             margin-bottom: 1.5rem;
         }
-        
-        /* Estilos para el título de la pregunta */
+
         .text-lg {
-            font-size: 1.125rem;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .font-semibold {
             font-weight: 600;
         }
 
-        .mb-2 {
-            margin-bottom: 0.5rem;
+        .font-bold {
+            font-weight: 700;
         }
-        
-        /* Estilos para las listas de respuestas */
-        .space-y-2 > * + * {
+
+        .text-sm {
+            font-size: 0.850rem;
+        }
+
+        .text-gray-600 {
+            color: #4a5568;
+        }
+
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+
+        .space-y-2>*+* {
             margin-top: 0.5rem;
         }
-        
-        /* Estilos para los elementos de lista */
+
+        .page-break {
+            page-break-before: always;
+        }
+
         .flex {
             display: flex;
         }
@@ -54,74 +97,53 @@
         .items-center {
             align-items: center;
         }
-        
-        /* Estilos para los checkboxes */
+
         .mr-2 {
             margin-right: 0.5rem;
         }
 
-/* Estilos para el membrete del examen */
-.exam-header {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 12px;
-    margin-bottom: 24px;
-}
+        input[type='checkbox'] {
+            -webkit-appearance: none;
+            width: 13px;
+            height: 13px;
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 4px;
+        }
 
-.header-img{
-    display: flex;
-    justify-content: space-around;
-}
+        .flex.items-center {
+            display: flex;
+            align-items: center;
+        }
 
-/* Estilo para la información esencial */
-.header-info {
-    text-align: start;
-    padding: 20px;
-    border-bottom: 2px solid #ccc;  
-    margin-bottom: 20px;
-    background-color: #f8f8f8;
-}
+        .header-img{
+            display: flex;
+            justify-content: space-around;
+        }
 
-/* Estilo para los títulos y textos */
-.header-info h1, .header-info h2 {
-    margin: 0;
-    font-weight: bold;
-}
+        ul li {
+            line-height: 1.1;
+            display: flex;
+            flex-direction: row;
+        }
 
-.header-info h1 {
-    font-size: 24px;
-    color: #333;
-}
-
-.header-info h2 {
-    font-size: 18px;
-    color: #555;
-    margin-top: 10px;
-}
-
-.header-info p {
-    margin: 5px 0;
-    font-size: 14px;
-    color: #777;
-}
-
-/* Estilo adicional para la sección de información */
-.header-info p strong {
-    color: #333;
-}
-
-</style>
+        label{
+            max-width: 90%;
+            word-break: break-all;
+        }
+    </style>
 
 </head>
+
 <body>
     <div class="container">
-    
-    <!-- Contenedor de preguntas -->
-    <div id="preguntasContainer"></div>
+
+        <!-- Contenedor de preguntas -->
+        <div id="preguntasContainer"></div>
     </div>
 </body>
+
 </html>
 
 <head>
 </head>
-
