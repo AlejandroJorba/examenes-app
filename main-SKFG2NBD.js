@@ -113,25 +113,25 @@ import{$ as We,$a as Ta,A as M0,Aa as W0,Ab as yr,B as vy,Ba as dl,Bb as K0,C as
     95
     97
 `,l=navigator.userAgent;this.isMobile=/Mobi|Android|iPhone|iPad|iPod/.test(l),this.isMobile&&this.toastService.showToast({type:"info",message:"Record\xE1 que la descarga del PDF no est\xE1 disponible en dispositivos m\xF3viles.",active:!0}),this.questionForm=this.fb.group({preguntasTextarea:[c,[si.required]]})}ngAfterViewInit(){this.shepherdService.defaultStepOptions={arrow:!0,cancelIcon:{enabled:!0},scrollTo:{behavior:"smooth",block:"center"},when:{show:function(){if(this.id!="firstStep"){let i=this.getElement()?.querySelector(".shepherd-footer");i?.classList.remove("single-button","multiple-buttons"),i?.classList.add("multiple-buttons")}}}},this.shepherdService.modal=!0,this.shepherdService.confirmCancel=!1,this.shepherdService.addSteps([{id:"firstStep",text:"Gracias por elegir nuestra aplicaci\xF3n. Te voy a guiar en un recorrido breve para que puedas aprovechar todas sus funcionalidades.",modalOverlayOpeningPadding:10,floatingUIOptions:{middleware:[hi({mainAxis:30,crossAxis:40})]},buttons:[{text:"Siguiente",action(){return this.next()}}]},{text:"Ac\xE1 pod\xE9s modificar el membrete de la evaluaci\xF3n. Hac\xE9 clic para abrir el popup.",attachTo:{element:"#buttonModal",on:"left"},modalOverlayOpeningPadding:10,floatingUIOptions:{middleware:[hi({mainAxis:30,crossAxis:40})]},buttons:[{text:"Anterior",action(){return this.back()}},{text:"Siguiente",action:()=>(this.mostrarModal=!0,setTimeout(()=>{this.shepherdService.next()},1))}]},{text:`
-        Estos son los campos que pod\xE9s modificar en el membrete. Todos son opcionales, y si no se completan, se mostrar\xE1n autom\xE1ticamente la fecha, el puntaje total y el nombre del examen.
+        Estos son los campos opcionales que pod\xE9s modificar en el membrete. Si no los complet\xE1s, se mostrar\xE1n la fecha, el puntaje total y el nombre del examen.
         <br><br>
-        <strong>Instituci\xF3n:</strong> Ingres\xE1 el nombre de la instituci\xF3n.
+        <strong>Instituci\xF3n:</strong> Nombre de la instituci\xF3n.
         <br><br>
-        <strong>Logos de la instituci\xF3n:</strong> Pod\xE9s agregar uno o varios logos de la instituci\xF3n.
+        <strong>Logos:</strong> Agreg\xE1 uno o varios logos.
         <br><br>
-        <strong>Examen:</strong> Indic\xE1 el nombre del examen.
+        <strong>Examen:</strong> Nombre del examen.
         <br><br>
-        <strong>Fecha:</strong> Seleccion\xE1 la fecha del examen.
+        <strong>Fecha:</strong> Fecha del examen.
         <br><br>
-        <strong>Duraci\xF3n:</strong> Indic\xE1 la duraci\xF3n del examen.
+        <strong>Duraci\xF3n:</strong> Duraci\xF3n (en horas o minutos).
         <br><br>
-        <strong>Profesor:</strong> Ingres\xE1 el nombre del profesor.
+        <strong>Profesor:</strong> Nombre del profesor.
         <br><br>
-        <strong>C\xE1tedra:</strong> Indic\xE1 el nombre de la c\xE1tedra o materia.
+        <strong>C\xE1tedra:</strong> Nombre de la materia.
         <br><br>
-        <strong>DNI Alumno:</strong> Si seleccionas esta opci\xF3n, se incluir\xE1 el campo DNI en el membrete.
+        <strong>DNI Alumno:</strong> Incluir campo DNI.
         <br><br>
-        <strong>Puntos:</strong> Si seleccionas esta opci\xF3n, se mostrar\xE1n los puntos asignados a cada pregunta, calculados autom\xE1ticamente como 100 dividido por la cantidad de preguntas.
+        <strong>Puntos:</strong> Mostrar los puntos por pregunta (calculados autom\xE1ticamente).
         `,attachTo:{element:"#modal",on:"left"},modalOverlayOpeningPadding:10,floatingUIOptions:{middleware:[hi({mainAxis:30,crossAxis:40})]},buttons:[{text:"Anterior",action:()=>(this.mostrarModal=!1,this.shepherdService.back())},{text:"Siguiente",action:()=>(this.mostrarModal=!1,this.shepherdService.next())}]},{text:`
         Ac\xE1 se ingresan las preguntas.
         <br><br>
